@@ -26,6 +26,8 @@ class Grid():
 
         Should also intialise the brush size to the DEFAULT provided as a class variable.
         """
+        self.x=x
+        self.y=y
         self.grid: ArrayR[ArrayR[str]] = ArrayR(x)
         self.grid[:] = [[LayerStore for i in range(y)] for j in range(x)]
         self.draw_style=draw_style
@@ -35,10 +37,11 @@ class Grid():
     """def __getattr__(self):
         return getattr(self.brush_size)"""
 
-    def __getitem__(self, index:tuple):
-        x, y = index
-        return self.grid[x][y]
-
+    def __getitem__(self,index1):    
+        return self.grid[index1]
+    
+    def gridreturn(self,index):
+        return self.grid[index]
 
     def increase_brush_size(self,MAX_BRUSH):
         """
@@ -71,3 +74,10 @@ class Grid():
         Activate the special affect on all grid squares.
         """
         raise NotImplementedError()
+"""
+class yval():
+    def __init__(self,index1) -> None:
+        self.index1=index1
+    def __getitem__(self,index2):
+        return Grid.gridreturn[self.index1][index2]
+"""

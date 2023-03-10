@@ -128,6 +128,7 @@ class MyWindow(arcade.Window):
                     self.GRID_SQ_WIDTH * (x+1),
                     self.GRID_SQ_HEIGHT * (y+1),
                     self.GRID_SQ_HEIGHT * y,
+                    print(self.grid[x][y]),
                     self.grid[x][y].get_color(self.BG[:], self.timestamp, x, y),
                 )
 
