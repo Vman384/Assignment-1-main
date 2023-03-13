@@ -1,8 +1,9 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from layer_util import Layer
-
-
+from data_structures.stack_adt import ArrayStack
+import layers
+from data_structures.queue_adt import CircularQueue
 
 class LayerStore(ABC):
 
@@ -39,7 +40,7 @@ class LayerStore(ABC):
         """
         pass
 
-class SetLayerStore(LayerStore,Layer):
+class SetLayerStore(LayerStore):
     """
     Set layer store. A single layer can be stored at a time (or nothing at all)
     - add: Set the single layer.
@@ -47,16 +48,28 @@ class SetLayerStore(LayerStore,Layer):
     - special: Invert the colour output.
     """
     def __init__(self) -> None:
-        self.layer = Layer
+        self.layers_store = CircularQueue(1)
 
-    def add(self,value):
-        self.layer(value)
 
-    def get_color(self) -> tuple[int, int, int]:
+    def add(self, layer: Layer) -> bool:
+        """
+        Add a layer to the store.
+        Returns true if the LayerStore was actually changed.
+        """
+        current_layer = self.layer
+        if self.layer.apply(layer) == current_layer:
+            self.layer.apply(layer)
+            return True
+        return False
+
+    def get_color(self, start, timestamp, x, y)  -> tuple[int, int, int]:
         """
         Returns the colour this square should show, given the current layers.
         """
-        return self.layer
+        if self.layers_store.is_empty():
+            return start
+        current_layer = self.layers_store.serve()
+        current_layer.apply(start, timestamp, x, y)
 
 
     def erase(self, layer: Layer) -> bool:
@@ -64,7 +77,13 @@ class SetLayerStore(LayerStore,Layer):
         Complete the erase action with this layer
         Returns true if the LayerStore was actually changed.
         """
-        self.layer.pop()
+        pass
+
+    def special(self):
+        """
+        Special mode. Different for each store implementation.
+        """
+        return layers.invert(self.layer)
 
 
 class AdditiveLayerStore(LayerStore):
@@ -74,7 +93,7 @@ class AdditiveLayerStore(LayerStore):
     - erase: Remove the first layer that was added. Ignore what is currently selected.
     - special: Reverse the order of current layers (first becomes last, etc.)
     """
-
+    #will use a queue of layers
     pass
 
 class SequenceLayerStore(LayerStore):
@@ -86,5 +105,5 @@ class SequenceLayerStore(LayerStore):
         Of all currently applied layers, remove the one with median `name`.
         In the event of two layers being the median names, pick the lexicographically smaller one.
     """
-
+    #stack of layers
     pass

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from data_structures.referential_array import ArrayR
-from layer_store import LayerStore
+from layer_store import SetLayerStore, AdditiveLayerStore, SequenceLayerStore
+from layer_util import Layer
 
 class Grid():
     DRAW_STYLE_SET = "SET"
@@ -27,21 +28,38 @@ class Grid():
         Should also intialise the brush size to the DEFAULT provided as a class variable.
         """
         self.x=x
-        self.y=y
-        self.grid: ArrayR[ArrayR[str]] = ArrayR(x)
-        self.grid[:] = [[LayerStore for i in range(y)] for j in range(x)]
+        self.y=y    
         self.draw_style=draw_style
         self.brush_size=brush_size
+        self.grid = self.create_grid(draw_style, x, y)
+       
 
+    def create_grid(self, draw_style, x, y):
+        #made a nested list with lists of length y storing layerstore object repeated in list of length x
+        #example with x and y 3[[Layerstore,Layerstore,Layerstore],[Layerstore,Layerstore,Layerstore],[Layerstore,Layerstore,Layerstore]]
+        #making the an instace of the grid object that is an array of length x (x or y doesnt matter)
+        #O(n^2)
+        self.grid = ArrayR(x)
+        temp_list = ArrayR(y)
+        for i in range(x):
+            for j in range(y):
+                if draw_style ==  'SET':
+                    temp_list[j] = SetLayerStore()
+                    print(temp_list[j])
+                elif draw_style == 'ADD':
+                    temp_list[j] = AdditiveLayerStore()
+                elif draw_style == "SEQUENCE":
+                    temp_list[j] = SequenceLayerStore()
+                else:
+                    raise TypeError('Invalid Draw Style Invalid')
+            self.grid[i] = temp_list
+            print(self.grid[0][0])
+        return self.grid
 
-    """def __getattr__(self):
-        return getattr(self.brush_size)"""
-
-    def __getitem__(self,index1):    
-        return self.grid[index1]
-    
-    def gridreturn(self,index):
+    #using the magic method to return the layerstore value at that coordinate, technically getitem is called twice
+    def __getitem__(self,index): 
         return self.grid[index]
+    
 
     def increase_brush_size(self,MAX_BRUSH):
         """
@@ -49,6 +67,7 @@ class Grid():
         if the brush size is already MAX_BRUSH,
         then do nothing.
         """
+        # checks to see if brush size is less than max brush size, otherwise returns the increased brush size
         if self.brush_size<MAX_BRUSH:
             self.brush_size+=1
             print('increased brush size')
@@ -62,6 +81,7 @@ class Grid():
         if the brush size is already MIN_BRUSH,
         then do nothing.
         """
+        # checks to see if brush size is more than min brush size, otherwise returns the decreased brush size
         if self.brush_size<MIN_BRUSH:
             self.brush_size-=1
             print('decreased brush size')
@@ -74,10 +94,4 @@ class Grid():
         Activate the special affect on all grid squares.
         """
         raise NotImplementedError()
-"""
-class yval():
-    def __init__(self,index1) -> None:
-        self.index1=index1
-    def __getitem__(self,index2):
-        return Grid.gridreturn[self.index1][index2]
-"""
+
