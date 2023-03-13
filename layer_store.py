@@ -47,20 +47,25 @@ class SetLayerStore(LayerStore):
     - erase: Remove the single layer. Ignore what is currently selected.
     - special: Invert the colour output.
     """
-    def __init__(self) -> None:
-        self.layers_store = CircularQueue(1)
 
+    def __init__(self) -> None:
+        self.layers_store = ArrayStack(1)
+        self.special_state = False
 
     def add(self, layer: Layer) -> bool:
         """
         Add a layer to the store.
         Returns true if the LayerStore was actually changed.
         """
-        current_layer = self.layer
-        if self.layer.apply(layer) == current_layer:
-            self.layer.apply(layer)
-            return True
-        return False
+        if self.layers_store.is_empty():
+            self.layers_store.push(layer)
+            return True  
+        current_layer = self.layers_store.peek()
+        if layer == current_layer:
+            return False
+        self.layers_store.pop()
+        self.layers_store.push(layer)
+        return True
 
     def get_color(self, start, timestamp, x, y)  -> tuple[int, int, int]:
         """
@@ -68,8 +73,12 @@ class SetLayerStore(LayerStore):
         """
         if self.layers_store.is_empty():
             return start
-        current_layer = self.layers_store.serve()
-        current_layer.apply(start, timestamp, x, y)
+        current_layer = self.layers_store.peek()
+        color = current_layer.apply(start, timestamp, x, y)
+        x = self.special_state
+        if x == True:
+            color = layers.invert.apply(color,timestamp, x, y)
+        return color
 
 
     def erase(self, layer: Layer) -> bool:
@@ -77,13 +86,26 @@ class SetLayerStore(LayerStore):
         Complete the erase action with this layer
         Returns true if the LayerStore was actually changed.
         """
-        pass
+        if self.layers_store.is_empty():
+            return False
+        self.layers_store.pop()
+        return True
 
     def special(self):
         """
         Special mode. Different for each store implementation.
         """
-        return layers.invert(self.layer)
+        if self.special_state == False:
+            self.special_state = True
+            return self.special_state
+        elif self.special_state == True:
+            self.special_state = False
+            return self.special_state
+        
+
+        
+        
+
 
 
 class AdditiveLayerStore(LayerStore):

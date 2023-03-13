@@ -45,7 +45,6 @@ class Grid():
             for j in range(y):
                 if draw_style ==  'SET':
                     temp_list[j] = SetLayerStore()
-                    print(temp_list[j])
                 elif draw_style == 'ADD':
                     temp_list[j] = AdditiveLayerStore()
                 elif draw_style == "SEQUENCE":
@@ -53,7 +52,6 @@ class Grid():
                 else:
                     raise TypeError('Invalid Draw Style Invalid')
             self.grid[i] = temp_list
-            print(self.grid[0][0])
         return self.grid
 
     #using the magic method to return the layerstore value at that coordinate, technically getitem is called twice
@@ -61,28 +59,28 @@ class Grid():
         return self.grid[index]
     
 
-    def increase_brush_size(self,MAX_BRUSH):
+    def increase_brush_size(self):
         """
         Increases the size of the brush by 1,
         if the brush size is already MAX_BRUSH,
         then do nothing.
         """
         # checks to see if brush size is less than max brush size, otherwise returns the increased brush size
-        if self.brush_size<MAX_BRUSH:
+        if self.brush_size<self.MAX_BRUSH:
             self.brush_size+=1
             print('increased brush size')
         else:
             print('brush size is already max')
         return self.brush_size
 
-    def decrease_brush_size(self,MIN_BRUSH):
+    def decrease_brush_size(self):
         """
         Decreases the size of the brush by 1,
         if the brush size is already MIN_BRUSH,
         then do nothing.
         """
         # checks to see if brush size is more than min brush size, otherwise returns the decreased brush size
-        if self.brush_size<MIN_BRUSH:
+        if self.brush_size>self.MIN_BRUSH+1:
             self.brush_size-=1
             print('decreased brush size')
         else:
