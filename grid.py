@@ -16,6 +16,7 @@ class Grid():
     DEFAULT_BRUSH_SIZE = 2
     MAX_BRUSH = 5
     MIN_BRUSH = 0
+    brush_size = DEFAULT_BRUSH_SIZE
     def __init__(self, draw_style, x, y,brush_size = DEFAULT_BRUSH_SIZE) -> None:
         """
         Initialise the grid object.
@@ -86,10 +87,12 @@ class Grid():
         else:
             print('brush size is already min')
         return self.brush_size
+    
 
     def special(self):
         """
         Activate the special affect on all grid squares.
         """
         raise NotImplementedError()
-
+    
+ 
