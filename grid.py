@@ -16,7 +16,6 @@ class Grid():
     DEFAULT_BRUSH_SIZE = 2
     MAX_BRUSH = 5
     MIN_BRUSH = 0
-    brush_size = DEFAULT_BRUSH_SIZE
     def __init__(self, draw_style, x, y,brush_size = DEFAULT_BRUSH_SIZE) -> None:
         """
         Initialise the grid object.
@@ -30,8 +29,8 @@ class Grid():
         """
         self.x=x
         self.y=y    
-        self.draw_style=draw_style
-        self.brush_size=brush_size
+        self.draw_style= draw_style
+        self.brush_size= brush_size
         self.grid = self.create_grid(draw_style, x, y)
        
 
@@ -39,10 +38,10 @@ class Grid():
         #made a nested list with lists of length y storing layerstore object repeated in list of length x
         #example with x and y 3[[Layerstore,Layerstore,Layerstore],[Layerstore,Layerstore,Layerstore],[Layerstore,Layerstore,Layerstore]]
         #making the an instace of the grid object that is an array of length x (x or y doesnt matter)
-        #O(n^2)
+        #O(x*y) if x==y O(n^2)
         self.grid = ArrayR(x)
-        temp_list = ArrayR(y)
         for i in range(x):
+            temp_list = ArrayR(y)
             for j in range(y):
                 if draw_style ==  'SET':
                     temp_list[j] = SetLayerStore()
@@ -60,6 +59,9 @@ class Grid():
         return self.grid[index]
     
 
+    def get_brush_size(self):
+        return self.brush_size
+
     def increase_brush_size(self):
         """
         Increases the size of the brush by 1,
@@ -69,7 +71,7 @@ class Grid():
         # checks to see if brush size is less than max brush size, otherwise returns the increased brush size
         if self.brush_size<self.MAX_BRUSH:
             self.brush_size+=1
-            print('increased brush size')
+            print(f'increased brush size to {self.brush_size}')
         else:
             print('brush size is already max')
         return self.brush_size
@@ -81,9 +83,9 @@ class Grid():
         then do nothing.
         """
         # checks to see if brush size is more than min brush size, otherwise returns the decreased brush size
-        if self.brush_size>self.MIN_BRUSH+1:
+        if self.brush_size>self.MIN_BRUSH:
             self.brush_size-=1
-            print('decreased brush size')
+            print(f'decreased brush size to {self.brush_size}')
         else:
             print('brush size is already min')
         return self.brush_size
