@@ -1,7 +1,6 @@
 from __future__ import annotations
 from data_structures.referential_array import ArrayR
 from layer_store import SetLayerStore, AdditiveLayerStore, SequenceLayerStore
-from layer_util import Layer
 
 class Grid():
     DRAW_STYLE_SET = "SET"

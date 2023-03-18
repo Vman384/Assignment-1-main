@@ -4,6 +4,9 @@ from layer_util import Layer
 from data_structures.stack_adt import ArrayStack
 import layers
 from data_structures.queue_adt import CircularQueue
+from data_structures.array_sorted_list import ArraySortedList
+from data_structures.sorted_list_adt import ListItem
+
 
 class LayerStore(ABC):
 
@@ -49,6 +52,7 @@ class SetLayerStore(LayerStore):
     """
 
     def __init__(self) -> None:
+        #O(1)
         self.layers_store = ArrayStack(1)
         self.special_state = False
 
@@ -56,6 +60,7 @@ class SetLayerStore(LayerStore):
         """
         Add a layer to the store.
         Returns true if the LayerStore was actually changed.
+        O(1)
         """
         if self.layers_store.is_empty():
             self.layers_store.push(layer)
@@ -70,6 +75,7 @@ class SetLayerStore(LayerStore):
     def get_color(self, start, timestamp, x, y)  -> tuple[int, int, int]:
         """
         Returns the colour this square should show, given the current layers.
+        O(1)
         """
         if self.layers_store.is_empty():
             return start
@@ -84,6 +90,7 @@ class SetLayerStore(LayerStore):
         """
         Complete the erase action with this layer
         Returns true if the LayerStore was actually changed.
+        O(1)
         """
         if self.layers_store.is_empty():
             return False
@@ -93,6 +100,7 @@ class SetLayerStore(LayerStore):
     def special(self):
         """
         Special mode. Different for each store implementation.
+        O(1)
         """
         if self.special_state == False:
             self.special_state = True
@@ -115,12 +123,14 @@ class AdditiveLayerStore(LayerStore):
     - special: Reverse the order of current layers (first becomes last, etc.)
     """
     def __init__(self) -> None:
+        #O(1)
         self.layers_store = CircularQueue(100)
 
     def add(self, layer: Layer) -> bool:
         """
         Add a layer to the store.
         Returns true if the LayerStore was actually changed.
+        O(1)
         """
         self.layers_store.append(layer)
         return True
@@ -128,6 +138,7 @@ class AdditiveLayerStore(LayerStore):
     def get_color(self, start, timestamp, x, y)  -> tuple[int, int, int]:
         """
         Returns the colour this square should show, given the current layers.
+        O(N)
         """
         if self.layers_store.is_empty():
             return start
@@ -145,6 +156,7 @@ class AdditiveLayerStore(LayerStore):
         """
         Complete the erase action with this layer
         Returns true if the LayerStore was actually changed.
+        O(1)
         """
         if self.layers_store.is_empty():
             return False
@@ -154,11 +166,12 @@ class AdditiveLayerStore(LayerStore):
     def special(self):
         """
         Special mode. Different for each store implementation.
+        reverses the store of layers and is O(N)
         """
         self.reversed_queue = ArrayStack(100)
-        for _ in range(len(self.layers_store)):
+        for _ in range(len(self.layers_store)): #O(N)
             self.reversed_queue.push(self.layers_store.serve())
-        for _ in range(len(self.reversed_queue)):
+        for _ in range(len(self.reversed_queue)): #(N)
             self.layers_store.append(self.reversed_queue.pop())
 
 
@@ -173,5 +186,83 @@ class SequenceLayerStore(LayerStore):
         Of all currently applied layers, remove the one with median `name`.
         In the event of two layers being the median names, pick the lexicographically smaller one.
     """
-    #stack of layers
-    pass
+    def __init__(self) -> None:
+        #O(1)
+        self.layers_store = ArraySortedList(100)
+
+    def add(self, layer: Layer) -> bool:
+        """
+        Add a layer to the store.
+        Returns true if the LayerStore was actually changed.
+        O(Log(N))
+        """
+        layer_to_insert = ListItem(layer, layer.index)
+        self.layers_store.add(layer_to_insert)
+        print(self.layers_store)
+        return True
+                
+
+
+        return True
+
+    def get_color(self, start :tuple , timestamp: float, x:int, y: int)  -> tuple[int, int, int]:
+        """
+        Returns the colour this square should show, given the current layers.
+        O(N)
+        """
+        if self.layers_store.is_empty():
+            return start
+
+        current_color = start
+
+        for i in range(len(self.layers_store)):
+            current_layer = self.layers_store[i].value
+            current_color = current_layer.apply(current_color, timestamp, x, y)
+    
+        return current_color
+
+    def erase(self, layer: Layer) -> bool:
+        """
+        Complete the erase action with this layer
+        Returns true if the LayerStore was actually changed.
+        O(N)
+        best case of one is worst case of other 
+        """
+        if self.layers_store.is_empty():
+            return False
+        for i in  range(len(self.layers_store)):
+            if self.layers_store[i].value == layer:
+                self.layers_store.length -=1 
+                self.layers_store._shuffle_left(i)
+                return True
+        return False
+
+    def special(self):
+        """
+        Special mode. Different for each store implementation.
+        reverses the store of layers and is O(N^2)
+        """
+        length = len(self.layers_store)
+        self.alphabetical_layers_store = ArraySortedList(len(self.layers_store))
+        for i in range(length):
+            current_layer = ListItem(self.layers_store[i].value,0)
+            self.alphabetical_layers_store.add(current_layer)
+        print(f'start {self.alphabetical_layers_store}')   
+        for mark in range(length-1,0,-1):
+            swapped = False
+            for i in range(mark):
+               if  self.alphabetical_layers_store[i].value.name >  self.alphabetical_layers_store[i+1].value.name:
+                    self.swap(self.alphabetical_layers_store,i,i+1)
+                    swapped = True
+            if not swapped:
+                break
+        print(f"alphabetically sorted: {self.alphabetical_layers_store}")
+        print(f"normal {self.layers_store}")
+        self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[length//2]))
+        print(f"after change {self.layers_store}")
+
+    def swap(self,the_list,i,j):
+        tmp = the_list[i]  
+        the_list[i] = the_list[j]
+        the_list[j] =tmp       
+                

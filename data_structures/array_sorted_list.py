@@ -28,12 +28,15 @@ class ArraySortedList(SortedList[T]):
         SortedList.__init__(self)
 
     def __getitem__(self, index: int) -> T:
-        """ Magic method. Return the element at a given position. """
+        """ Magic method. Return the element at a given position. 
+        O(1)
+        """
         return self.array[index]
 
     def __setitem__(self, index: int, item: ListItem) -> None:
         """ Magic method. Insert the item at a given position,
             if possible (!). Shift the following elements to the right.
+            O(N)
         """
         if self.is_empty() or \
                 (index == 0 and item.key <= self[index].key) or \
@@ -50,24 +53,32 @@ class ArraySortedList(SortedList[T]):
             raise IndexError('Element should be inserted in sorted order')
 
     def __contains__(self, item: ListItem):
-        """ Checks if value is in the list. """
+        """ Checks if value is in the list. 
+        O(N)
+        """
         for i in range(len(self)):
             if self.array[i] == item:
                 return True
         return False
 
     def _shuffle_right(self, index: int) -> None:
-        """ Shuffle items to the right up to a given position. """
+        """ Shuffle items to the right up to a given position. 
+        O(N)
+        """
         for i in range(len(self), index, -1):
             self.array[i] = self.array[i - 1]
 
     def _shuffle_left(self, index: int) -> None:
-        """ Shuffle items starting at a given position to the left. """
+        """ Shuffle items starting at a given position to the left.
+         O(N)
+        """
         for i in range(index, len(self)):
             self.array[i] = self.array[i + 1]
 
     def _resize(self) -> None:
-        """ Resize the list. """
+        """ Resize the list. 
+        O(N)
+        """
         # doubling the size of our list
         new_array = ArrayR(2 * len(self.array))
 
@@ -79,7 +90,9 @@ class ArraySortedList(SortedList[T]):
         self.array = new_array
 
     def delete_at_index(self, index: int) -> ListItem:
-        """ Delete item at a given position. """
+        """ Delete item at a given position. 
+        O(N)
+        """
         if index >= len(self):
             raise IndexError('No such index in the list')
         item = self.array[index]
@@ -88,18 +101,24 @@ class ArraySortedList(SortedList[T]):
         return item
 
     def index(self, item: ListItem) -> int:
-        """ Find the position of a given item in the list. """
+        """ Find the position of a given item in the list.
+         O(Log(N)) 
+        """
         pos = self._index_to_add(item)
         if pos < len(self) and self[pos] == item:
             return pos
         raise ValueError('item not in list')
 
     def is_full(self):
-        """ Check if the list is full. """
+        """ Check if the list is full. 
+        O(1)
+        """
         return len(self) >= len(self.array)
 
     def add(self, item: ListItem) -> None:
-        """ Add new element to the list. """
+        """ Add new element to the list. 
+        O(Log(n))
+        """
         if self.is_full():
             self._resize()
 
@@ -110,7 +129,9 @@ class ArraySortedList(SortedList[T]):
         self.length += 1
 
     def _index_to_add(self, item: ListItem) -> int:
-        """ Find the position where the new item should be placed. """
+        """ Find the position where the new item should be placed. 
+        O(Log(N))
+        """
         low = 0
         high = len(self) - 1
 
