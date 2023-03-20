@@ -198,7 +198,6 @@ class SequenceLayerStore(LayerStore):
         """
         layer_to_insert = ListItem(layer, layer.index)
         self.layers_store.add(layer_to_insert)
-        print(self.layers_store)
         return True
                 
 
@@ -245,24 +244,24 @@ class SequenceLayerStore(LayerStore):
         length = len(self.layers_store)
         self.alphabetical_layers_store = ArraySortedList(len(self.layers_store))
         for i in range(length):
-            current_layer = ListItem(self.layers_store[i].value,0)
+            current_layer = ListItem(self.layers_store[i],0)
             self.alphabetical_layers_store.add(current_layer)
         print(f'start {self.alphabetical_layers_store}')   
-        for mark in range(length-1,0,-1):
+        for _ in range(length-1):
             swapped = False
-            for i in range(mark):
-               if  self.alphabetical_layers_store[i].value.name >  self.alphabetical_layers_store[i+1].value.name:
-                    self.swap(self.alphabetical_layers_store,i,i+1)
+            for i in range(length-1):
+               if  self.alphabetical_layers_store[i].value.value.name >  self.alphabetical_layers_store[i+1].value.value.name:
+                    self.swap(i,i+1)
                     swapped = True
             if not swapped:
                 break
         print(f"alphabetically sorted: {self.alphabetical_layers_store}")
         print(f"normal {self.layers_store}")
-        self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[length//2]))
+        self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[length//2].value))
         print(f"after change {self.layers_store}")
 
-    def swap(self,the_list,i,j):
-        tmp = the_list[i]  
-        the_list[i] = the_list[j]
-        the_list[j] =tmp       
+    def swap(self,i,j):
+        tmp = self.alphabetical_layers_store[i]  
+        self.alphabetical_layers_store[i] = self.alphabetical_layers_store[j]
+        self.alphabetical_layers_store[j] = tmp       
                 
