@@ -227,41 +227,26 @@ class SequenceLayerStore(LayerStore):
         O(N)
         best case of one is worst case of other 
         """
+        deleted = False
+        offset = 0
         if self.layers_store.is_empty():
-            return False
+            return deleted
         for i in  range(len(self.layers_store)):
             if self.layers_store[i].value == layer:
-                self.layers_store.length -=1 
-                self.layers_store._shuffle_left(i)
-                return True
-        return False
+                self.layers_store.delete_at_index(i+offset)
+                offset -=1
+                deleted = True
+        return deleted
 
     def special(self):
         """
         Special mode. Different for each store implementation.
-        reverses the store of layers and is O(N^2)
+        reverses the store of layers and is O(NLog(N))
         """
-        length = len(self.layers_store)
         self.alphabetical_layers_store = ArraySortedList(len(self.layers_store))
-        for i in range(length):
-            current_layer = ListItem(self.layers_store[i],0)
+        for i in range(len(self.layers_store)):
+            current_layer = ListItem(self.layers_store[i],self.layers_store[i].value.name)
             self.alphabetical_layers_store.add(current_layer)
-        print(f'start {self.alphabetical_layers_store}')   
-        for _ in range(length-1):
-            swapped = False
-            for i in range(length-1):
-               if  self.alphabetical_layers_store[i].value.value.name >  self.alphabetical_layers_store[i+1].value.value.name:
-                    self.swap(i,i+1)
-                    swapped = True
-            if not swapped:
-                break
-        print(f"alphabetically sorted: {self.alphabetical_layers_store}")
-        print(f"normal {self.layers_store}")
-        self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[length//2].value))
-        print(f"after change {self.layers_store}")
+        self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[int((len(self.layers_store)-1)//2)].value))
 
-    def swap(self,i,j):
-        tmp = self.alphabetical_layers_store[i]  
-        self.alphabetical_layers_store[i] = self.alphabetical_layers_store[j]
-        self.alphabetical_layers_store[j] = tmp       
                 
