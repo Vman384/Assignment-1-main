@@ -253,4 +253,3 @@ class SequenceLayerStore(LayerStore):
         if self.alphabetical_layers_store.is_empty():
             return
         self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[(len(self.alphabetical_layers_store)-1)//2].value))
-                
