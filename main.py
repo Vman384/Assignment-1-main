@@ -4,6 +4,9 @@ import math
 from grid import Grid
 from layer_util import get_layers, Layer
 from layers import lighten
+from undo import UndoTracker
+from action import PaintAction, PaintStep
+from replay import ReplayTracker 
 
 class MyWindow(arcade.Window):
     """ Painter Window """
@@ -287,11 +290,12 @@ class MyWindow(arcade.Window):
 
     def on_init(self):
         """Initialisation that occurs after the system initialisation."""
-        pass
+        self.undo_track = UndoTracker()
+        self.replay_tracker = ReplayTracker()
 
     def on_reset(self):
         """Called when a window reset is requested."""
-        pass
+
 
     def on_paint(self, layer: Layer, px, py):
         """
@@ -303,26 +307,30 @@ class MyWindow(arcade.Window):
         py: y position of the brush.
         """
         self.brush_size = self.grid.get_brush_size()
+        steps = PaintAction()
         for i in range(-self.brush_size,self.brush_size+1):
             for j in range(-self.brush_size,self.brush_size+1):
                 if abs(px-(px+i))+abs(py-(py+j))<=self.brush_size:
                     try:
-                        self.grid[abs(px+i)][abs(py+j)].add(layer)
+                        x = abs(px+i)
+                        y = abs(py+j)
+                        self.grid[x][y].add(layer)
+                        steps.add_step(PaintStep((x,y), layer))
                     except IndexError:
                         pass
-
+        self.undo_track.add_action(steps)                
 
     def on_undo(self):
         """Called when an undo is requested."""
-        pass
+        self.undo_track.undo(self.grid)
 
     def on_redo(self):
         """Called when a redo is requested."""
-        pass
+        self.undo_track.redo(self.grid)
 
     def on_special(self):
         """Called when the special action is requested."""
-        pass
+        self.grid.special()
 
     def on_replay_start(self):
         """Called when the replay starting is requested."""

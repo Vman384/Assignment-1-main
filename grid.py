@@ -94,6 +94,8 @@ class Grid():
         """
         Activate the special affect on all grid squares.
         """
-        raise NotImplementedError()
+        for i in range(self.x):
+            for j in range(self.y):
+                self.grid[i][j].special()
     
  

@@ -77,12 +77,15 @@ class SetLayerStore(LayerStore):
         Returns the colour this square should show, given the current layers.
         O(1)
         """
-        if self.layers_store.is_empty():
-            return start
-        current_layer = self.layers_store.peek()
-        color = current_layer.apply(start, timestamp, x, y)
+        color = start
+
+        if not self.layers_store.is_empty():
+            current_layer = self.layers_store.peek()
+            color = current_layer.apply(start, timestamp, x, y)
+
         if self.special_state:
             color = layers.invert.apply(color,timestamp, x, y)
+
         return color
 
 
@@ -245,8 +248,8 @@ class SequenceLayerStore(LayerStore):
         """
         self.alphabetical_layers_store = ArraySortedList(len(self.layers_store))
         for i in range(len(self.layers_store)):
-            current_layer = ListItem(self.layers_store[i],self.layers_store[i].value.name)
+            current_layer = ListItem(self.layers_store[i], self.layers_store[i].value.name)
             self.alphabetical_layers_store.add(current_layer)
-        self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[int((len(self.layers_store)-1)//2)].value))
+        self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[(len(self.alphabetical_layers_store)-1)//2].value))
 
                 
