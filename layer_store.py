@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from layer_util import Layer
+from layer_util import Layer, LAYERS
 from data_structures.stack_adt import ArrayStack
 import layers
 from data_structures.queue_adt import CircularQueue
@@ -191,7 +191,7 @@ class SequenceLayerStore(LayerStore):
     """
     def __init__(self) -> None:
         #O(1)
-        self.layers_store = ArraySortedList(100)
+        self.layers_store = ArraySortedList(10*len(LAYERS))
 
     def add(self, layer: Layer) -> bool:
         """
@@ -250,6 +250,7 @@ class SequenceLayerStore(LayerStore):
         for i in range(len(self.layers_store)):
             current_layer = ListItem(self.layers_store[i], self.layers_store[i].value.name)
             self.alphabetical_layers_store.add(current_layer)
+        if self.alphabetical_layers_store.is_empty():
+            return
         self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[(len(self.alphabetical_layers_store)-1)//2].value))
-
                 

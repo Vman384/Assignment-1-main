@@ -32,13 +32,17 @@ class ReplayTracker:
             - If there were no more actions to play, and so nothing happened, return True.
             - Otherwise, return False.
         """
-        for _ in range(len(self.replay_tracker)):
-            redo_layer = self.replay_tracker.serve()
-            redo_layer, is_undo = redo_layer
-            if not is_undo:
-                redo_layer.redo_apply(grid)
-                return True
+        if self.replay_tracker.is_empty():
+            return True
+        redo_layer = self.replay_tracker.serve()
+        redo_layer, is_undo = redo_layer
+        if is_undo:
+            redo_layer.undo_apply(grid)
+            return False
+        redo_layer.redo_apply(grid)
         return False
+    
+
 if __name__ == "__main__":
     action1 = PaintAction([], is_special=True)
     action2 = PaintAction([])
