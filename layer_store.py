@@ -200,6 +200,8 @@ class SequenceLayerStore(LayerStore):
         O(Log(N))
         """
         layer_to_insert = ListItem(layer, layer.index)
+        if self.layers_store.__contains__(layer_to_insert):
+            return False
         self.layers_store.add(layer_to_insert)
         return True
                 
@@ -252,4 +254,6 @@ class SequenceLayerStore(LayerStore):
             self.alphabetical_layers_store.add(current_layer)
         if self.alphabetical_layers_store.is_empty():
             return
-        self.layers_store.delete_at_index(self.layers_store.index(self.alphabetical_layers_store[(len(self.alphabetical_layers_store)-1)//2].value))
+        middle_layer = self.alphabetical_layers_store[(len(self.alphabetical_layers_store)-1)//2].value
+        
+        self.layers_store.delete_at_index(self.layers_store.index(middle_layer))

@@ -7,6 +7,7 @@ class UndoTracker:
     def __init__(self) -> None:
         self.undo_tracker = ArrayStack(1000)
         self.redo_tracker = ArrayStack(1000)
+
     def add_action(self, action: PaintAction) -> None:
         """
         Adds an action to the undo tracker.
@@ -17,6 +18,8 @@ class UndoTracker:
         if self.undo_tracker.is_full():
             return
         self.undo_tracker.push(action)
+
+        self.redo_tracker.clear()
 
     def undo(self, grid: Grid) -> PaintAction|None:
         """
@@ -39,7 +42,7 @@ class UndoTracker:
 
         :return: The action that was redone, or None.
         """
-        if self.undo_tracker.is_empty():
+        if self.redo_tracker.is_empty():
             return
         redo_action = self.redo_tracker.pop()
         self.undo_tracker.push(redo_action)

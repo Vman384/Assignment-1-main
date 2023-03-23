@@ -295,7 +295,7 @@ class MyWindow(arcade.Window):
 
     def on_reset(self):
         """Called when a window reset is requested."""
-
+        pass
 
     def on_paint(self, layer: Layer, px, py):
         """
@@ -334,14 +334,19 @@ class MyWindow(arcade.Window):
 
     def on_replay_start(self):
         """Called when the replay starting is requested."""
-        pass
+        while True:
+            if not self.on_replay_next_step():
+                break
+                
 
     def on_replay_next_step(self) -> bool:
         """
         Called when the next step of the replay is requested.
         Returns whether the replay is finished.
         """
-        return True
+        if not self.replay_tracker.play_next_action(self.grid):
+            return True
+        return False
 
     def on_increase_brush_size(self):
         """Called when an increase to the brush size is requested."""
