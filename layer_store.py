@@ -197,17 +197,16 @@ class SequenceLayerStore(LayerStore):
         """
         Add a layer to the store.
         Returns true if the LayerStore was actually changed.
-        O(Log(N))
+        O(N)
         """
-        layer_to_insert = ListItem(layer, layer.index)
-        if self.layers_store.__contains__(layer_to_insert):
-            return False
-        self.layers_store.add(layer_to_insert)
+        for i in range(len(self.layers_store)):
+            if self.layers_store[i].value == layer:
+                return False
+        else:
+            layer_to_insert = ListItem(layer, layer.index)
+            self.layers_store.add(layer_to_insert)
         return True
                 
-
-
-        return True
 
     def get_color(self, start :tuple , timestamp: float, x:int, y: int)  -> tuple[int, int, int]:
         """
@@ -229,24 +228,21 @@ class SequenceLayerStore(LayerStore):
         """
         Complete the erase action with this layer
         Returns true if the LayerStore was actually changed.
-        O(N)
+        O(N^2)
         best case of one is worst case of other 
         """
-        deleted = False
-        offset = 0
         if self.layers_store.is_empty():
-            return deleted
+            return False
         for i in  range(len(self.layers_store)):
             if self.layers_store[i].value == layer:
-                self.layers_store.delete_at_index(i+offset)
-                offset -=1
-                deleted = True
-        return deleted
+                self.layers_store.delete_at_index(i)
+                return True
+        return False
 
     def special(self):
         """
         Special mode. Different for each store implementation.
-        reverses the store of layers and is O(NLog(N))
+        reverses the store of layers and is O(Nlog(N))
         """
         self.alphabetical_layers_store = ArraySortedList(len(self.layers_store))
         for i in range(len(self.layers_store)):
@@ -255,5 +251,4 @@ class SequenceLayerStore(LayerStore):
         if self.alphabetical_layers_store.is_empty():
             return
         middle_layer = self.alphabetical_layers_store[(len(self.alphabetical_layers_store)-1)//2].value
-        
         self.layers_store.delete_at_index(self.layers_store.index(middle_layer))

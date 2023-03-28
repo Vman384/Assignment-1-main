@@ -37,7 +37,7 @@ class Grid():
         #made a nested list with lists of length y storing layerstore object repeated in list of length x
         #example with x and y 3[[Layerstore,Layerstore,Layerstore],[Layerstore,Layerstore,Layerstore],[Layerstore,Layerstore,Layerstore]]
         #making the an instace of the grid object that is an array of length x (x or y doesnt matter)
-        #O(x*y) if x==y O(n^2)
+        #O(x*y) if x==y O(n^2) best and worse case
         self.grid = ArrayR(x)
         for i in range(x):
             temp_list = ArrayR(y)
@@ -54,7 +54,22 @@ class Grid():
         return self.grid
 
     #using the magic method to return the layerstore value at that coordinate, technically getitem is called twice
-    def __getitem__(self,index): 
+    def __getitem__(self,index:int)-> SetLayerStore or AdditiveLayerStore or SequenceLayerStore:
+        """
+            gets the layer store object at the x and y coordinate
+
+            Args:
+            - 2 ints, x and y
+
+            Raises:
+            - Index Error: if the x or y input is out of range
+
+            Returns:
+            - result: Layer store object, the type hint
+
+            Complexity:
+            - Worst case and Best: O(1), getting an element from refrential array is always constant
+        """
         return self.grid[index]
     
 
@@ -93,6 +108,7 @@ class Grid():
     def special(self):
         """
         Activate the special affect on all grid squares.
+        O(N^2)
         """
         for i in range(self.x):
             for j in range(self.y):

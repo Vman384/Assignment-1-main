@@ -337,7 +337,7 @@ class MyWindow(arcade.Window):
         while True:
             if not self.on_replay_next_step():
                 break
-                
+            print('test')        
 
     def on_replay_next_step(self) -> bool:
         """
