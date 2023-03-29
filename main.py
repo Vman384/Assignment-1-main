@@ -6,7 +6,8 @@ from layer_util import get_layers, Layer
 from layers import lighten
 from undo import UndoTracker
 from action import PaintAction, PaintStep
-from replay import ReplayTracker 
+from replay import ReplayTracker
+
 
 class MyWindow(arcade.Window):
     """ Painter Window """
@@ -29,7 +30,8 @@ class MyWindow(arcade.Window):
 
     def __init__(self) -> None:
         """Initialise visual and logic variables."""
-        super().__init__(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.SCREEN_TITLE)
+        super().__init__(self.SCREEN_WIDTH, self.SCREEN_HEIGHT,
+                         self.SCREEN_TITLE)
         arcade.set_background_color(self.BG)
         self.grid: Grid = None
         self.draw_style = Grid.DRAW_STYLE_SET
@@ -60,38 +62,38 @@ class MyWindow(arcade.Window):
         # Action button sprites
         self.action_buttons = arcade.SpriteList()
         self.draw_mode_button = arcade.Sprite(
-            "img/on_off.png" if self.draw_style == Grid.DRAW_STYLE_SET else (
-                "img/additive.png" if self.draw_style == Grid.DRAW_STYLE_ADD else "img/sequence.png"
-            ),
-            scale=50/48,
+            "img/on_off.png" if self.draw_style == Grid.DRAW_STYLE_SET else
+            ("img/additive.png" if self.draw_style == Grid.DRAW_STYLE_ADD else
+             "img/sequence.png"),
+            scale=50 / 48,
         )
         self.draw_mode_button.center_x = self.DRAW_PANEL + self.LAYER_BUTTON_SIZE / 2
         self.draw_mode_button.center_y = self.LAYER_BUTTON_SIZE / 2
         self.action_buttons.append(self.draw_mode_button)
         self.replay_button = arcade.Sprite(
             "img/replay.png",
-            scale=50/48,
+            scale=50 / 48,
         )
         self.replay_button.center_x = self.DRAW_PANEL + 3 * self.LAYER_BUTTON_SIZE / 2
         self.replay_button.center_y = self.LAYER_BUTTON_SIZE / 2
         self.action_buttons.append(self.replay_button)
         self.brush_big_button = arcade.Sprite(
             "img/brush_up.png",
-            scale=50/48,
+            scale=50 / 48,
         )
         self.brush_big_button.center_x = self.DRAW_PANEL + self.LAYER_BUTTON_SIZE / 2
         self.brush_big_button.center_y = 3 * self.LAYER_BUTTON_SIZE / 2
         self.action_buttons.append(self.brush_big_button)
         self.brush_small_button = arcade.Sprite(
             "img/brush_down.png",
-            scale=50/48,
+            scale=50 / 48,
         )
         self.brush_small_button.center_x = self.DRAW_PANEL + 3 * self.LAYER_BUTTON_SIZE / 2
         self.brush_small_button.center_y = 3 * self.LAYER_BUTTON_SIZE / 2
         self.action_buttons.append(self.brush_small_button)
         self.special_button = arcade.Sprite(
             "img/special.png",
-            scale=50/48,
+            scale=50 / 48,
         )
         self.special_button.center_x = self.DRAW_PANEL + self.LAYER_BUTTON_SIZE / 2
         self.special_button.center_y = 5 * self.LAYER_BUTTON_SIZE / 2
@@ -108,19 +110,33 @@ class MyWindow(arcade.Window):
         self.clear()
         # UI - Layers
         for i, layer in enumerate(get_layers()):
-            if layer is None: break
+            if layer is None:
+                break
             xstart = (i % 2) * self.LAYER_BUTTON_SIZE + self.DRAW_PANEL
-            xend = ((i % 2)+1) * self.LAYER_BUTTON_SIZE + self.DRAW_PANEL
-            ystart = self.SCREEN_HEIGHT - (i//2) * self.LAYER_BUTTON_SIZE
-            yend = self.SCREEN_HEIGHT - (i//2+1) * self.LAYER_BUTTON_SIZE
-            bg = lighten.apply(layer.bg or self.BG[:], 0, 0, 0) if self.selected_layer_index == i else (layer.bg or self.BG[:])
+            xend = ((i % 2) + 1) * self.LAYER_BUTTON_SIZE + self.DRAW_PANEL
+            ystart = self.SCREEN_HEIGHT - (i // 2) * self.LAYER_BUTTON_SIZE
+            yend = self.SCREEN_HEIGHT - (i // 2 + 1) * self.LAYER_BUTTON_SIZE
+            bg = lighten.apply(layer.bg or self.BG[:], 0, 0,
+                               0) if self.selected_layer_index == i else (
+                                   layer.bg or self.BG[:])
             if not self.enable_ui:
                 bg = lighten.apply(bg, 0, 0, 0)
             arcade.draw_lrtb_rectangle_filled(xstart, xend, ystart, yend, bg)
             arcade.draw_lrtb_rectangle_outline(
-                xstart, xend, ystart, yend, (0, 0, 0), border_width=1,
+                xstart,
+                xend,
+                ystart,
+                yend,
+                (0, 0, 0),
+                border_width=1,
             )
-            arcade.draw_text(str(i), xstart, (ystart+yend)/2, (0, 0, 0), 18, width=xend-xstart, align="center", bold=True, anchor_y="center")
+            arcade.draw_text(str(i),
+                             xstart, (ystart + yend) / 2, (0, 0, 0),
+                             18,
+                             width=xend - xstart,
+                             align="center",
+                             bold=True,
+                             anchor_y="center")
         # UI - Draw Modes / Action buttons
         self.action_buttons.draw()
         # Grid
@@ -128,24 +144,28 @@ class MyWindow(arcade.Window):
             for y in range(self.GRID_SIZE_Y):
                 arcade.draw_lrtb_rectangle_filled(
                     self.GRID_SQ_WIDTH * x,
-                    self.GRID_SQ_WIDTH * (x+1),
-                    self.GRID_SQ_HEIGHT * (y+1),
+                    self.GRID_SQ_WIDTH * (x + 1),
+                    self.GRID_SQ_HEIGHT * (y + 1),
                     self.GRID_SQ_HEIGHT * y,
-                    self.grid[x][y].get_color(self.BG[:], self.timestamp, x, y),
+                    self.grid[x][y].get_color(self.BG[:], self.timestamp, x,
+                                              y),
                 )
 
-    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
+    def on_mouse_press(self, x: int, y: int, button: int,
+                       modifiers: int) -> None:
         """Called when the mouse buttons are pressed."""
         if x > self.DRAW_PANEL:
             if not self.enable_ui:
                 return
             # Buttons
             for i, layer in enumerate(get_layers()):
-                if layer is None: break
+                if layer is None:
+                    break
                 xstart = (i % 2) * self.LAYER_BUTTON_SIZE + self.DRAW_PANEL
-                xend = ((i % 2)+1) * self.LAYER_BUTTON_SIZE + self.DRAW_PANEL
-                ystart = self.SCREEN_HEIGHT - (i//2) * self.LAYER_BUTTON_SIZE
-                yend = self.SCREEN_HEIGHT - (i//2+1) * self.LAYER_BUTTON_SIZE
+                xend = ((i % 2) + 1) * self.LAYER_BUTTON_SIZE + self.DRAW_PANEL
+                ystart = self.SCREEN_HEIGHT - (i // 2) * self.LAYER_BUTTON_SIZE
+                yend = self.SCREEN_HEIGHT - (i // 2 +
+                                             1) * self.LAYER_BUTTON_SIZE
                 if xstart <= x < xend and yend <= y < ystart:
                     self.selected_layer_index = i
                     break
@@ -194,7 +214,7 @@ class MyWindow(arcade.Window):
         """Called when the mouse moves."""
         if not self.dragging:
             return
-        if not(0 <= self.selected_layer_index < len(get_layers())):
+        if not (0 <= self.selected_layer_index < len(get_layers())):
             return
         if x > self.DRAW_PANEL:
             return
@@ -228,7 +248,7 @@ class MyWindow(arcade.Window):
             mhat_dist = abs(x - self.prev_pos[0]) + abs(y - self.prev_pos[1])
             increment = 0.5
             points_to_draw = []
-            for d in range(1, math.ceil(mhat_dist/increment)+1):
+            for d in range(1, math.ceil(mhat_dist / increment) + 1):
                 distance = min(d * increment / mhat_dist, 1)
                 nx = distance * (x - self.prev_pos[0]) + self.prev_pos[0]
                 ny = distance * (y - self.prev_pos[1]) + self.prev_pos[1]
@@ -238,9 +258,7 @@ class MyWindow(arcade.Window):
         else:
             x_pos = int(x // self.GRID_SQ_WIDTH)
             y_pos = int(y // self.GRID_SQ_HEIGHT)
-            points_to_draw = [
-                (x_pos, y_pos)
-            ]
+            points_to_draw = [(x_pos, y_pos)]
         for px, py in points_to_draw:
             if self.prev_drawn is None or (px, py) != self.prev_drawn:
                 if 0 <= px < self.GRID_SIZE_X and 0 <= py < self.GRID_SIZE_Y:
@@ -306,19 +324,20 @@ class MyWindow(arcade.Window):
         px: x position of the brush.
         py: y position of the brush.
         """
-        self.brush_size = self.grid.get_brush_size()
+        self.brush_size = self.grid.brush_size
         steps = PaintAction()
-        for i in range(-self.brush_size,self.brush_size+1):
-            for j in range(-self.brush_size,self.brush_size+1):
-                if abs(px-(px+i))+abs(py-(py+j))<=self.brush_size:
+        for i in range(-self.brush_size, self.brush_size + 1):
+            for j in range(-self.brush_size, self.brush_size + 1):
+                if abs(px - (px + i)) + abs(py - (py + j)) <= self.brush_size:
                     try:
-                        x = abs(px+i)
-                        y = abs(py+j)
+                        x = abs(px + i)
+                        y = abs(py + j)
                         self.grid[x][y].add(layer)
-                        steps.add_step(PaintStep((x,y), layer))
+                        steps.add_step(PaintStep((x, y), layer))
                     except IndexError:
                         pass
-        self.undo_track.add_action(steps)                
+        self.undo_track.add_action(steps)
+        self.replay_tracker.add_action(steps)
 
     def on_undo(self):
         """Called when an undo is requested."""
@@ -334,19 +353,16 @@ class MyWindow(arcade.Window):
 
     def on_replay_start(self):
         """Called when the replay starting is requested."""
-        while True:
-            if not self.on_replay_next_step():
-                break
-            print('test')        
+        print("replay is now starting")
+
 
     def on_replay_next_step(self) -> bool:
         """
         Called when the next step of the replay is requested.
         Returns whether the replay is finished.
         """
-        if not self.replay_tracker.play_next_action(self.grid):
-            return True
-        return False
+        self.is_replaying = self.replay_tracker.play_next_action(self.grid)
+        return self.is_replaying
 
     def on_increase_brush_size(self):
         """Called when an increase to the brush size is requested."""
@@ -356,11 +372,13 @@ class MyWindow(arcade.Window):
         """Called when a decrease to the brush size is requested."""
         self.grid.decrease_brush_size()
 
+
 def main():
     """ Main function """
     window = MyWindow()
     window.setup()
     arcade.run()
+
 
 def run_with_func(func, pause=False):
     from threading import Thread
@@ -368,7 +386,7 @@ def run_with_func(func, pause=False):
     window.setup()
     if pause:
         _ = input("Press enter to begin test.")
-    t = Thread(target=func, args=(window,))
+    t = Thread(target=func, args=(window, ))
     t.start()
     arcade.run()
 
