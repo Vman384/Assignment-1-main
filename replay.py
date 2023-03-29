@@ -39,8 +39,8 @@ class ReplayTracker:
         redo_layer, is_undo = redo_layer
         if is_undo:
             redo_layer.undo_apply(grid)
-            return False
-        redo_layer.redo_apply(grid)
+        else:
+            redo_layer.redo_apply(grid)
         return False
 
 

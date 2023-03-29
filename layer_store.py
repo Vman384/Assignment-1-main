@@ -382,7 +382,18 @@ class SequenceLayerStore(LayerStore):
     def special(self):
         """
         Special mode. Different for each store implementation.
-        reverses the store of layers and is O(N^2)
+        removes the alphabetically middle layer
+        Args:
+        - None
+
+        Raises:
+        - None
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case and Best: O(N^2)
         """
         self.alphabetical_layers_store = ArraySortedList(len(self.layers_store))
         for i in range(len(self.layers_store)): #O(N)

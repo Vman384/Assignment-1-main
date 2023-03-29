@@ -5,8 +5,8 @@ from data_structures.stack_adt import ArrayStack
 
 class UndoTracker:
     def __init__(self) -> None:
-        self.undo_tracker = ArrayStack(1000)
-        self.redo_tracker = ArrayStack(1000)
+        self.undo_tracker = ArrayStack(10000)
+        self.redo_tracker = ArrayStack(10000)
 
     def add_action(self, action: PaintAction) -> None:
         """
