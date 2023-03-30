@@ -283,7 +283,7 @@ class SequenceLayerStore(LayerStore):
         Of all currently applied layers, remove the one with median `name`.
         In the event of two layers being the median names, pick the lexicographically smaller one.
     """
-
+    #can use a bitset to represent if the layers are applying or not todo if i have time
     def __init__(self) -> None:
         #O(1)
         self.layers_store = ArraySortedList(10 * len(LAYERS))

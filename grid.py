@@ -146,9 +146,10 @@ class Grid():
         Returns:
             - Nothing
 
-        time complexity = O(N^2) best and worst as it is nested for loop, ignoring the time complexity of special as that is different for each 
+        time complexity = O(N^2) best and worst as it is nested for loop assuming x and y are same size, 
+        ignoring the time complexity of special as that is different for each 
         layer store type
         """
         for i in range(self.x):
             for j in range(self.y):
-                self.grid[i][j].special()
+                self.grid[i][j].special() #O(1) or O(M^2) or O(M)

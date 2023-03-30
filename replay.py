@@ -23,6 +23,19 @@ class ReplayTracker:
 
         `is_undo` specifies whether the action was an undo action or not.
         Special, Redo, and Draw all have this is False.
+
+        Args:
+        - Bolean
+        - Paintaction
+
+        Raises:
+        - Exception if is full
+
+        Returns:
+        - None.
+
+        Complexity:
+        - Worst case and Best: O(N)
         """
         self.replay_tracker.append((action, is_undo))
 
@@ -32,15 +45,27 @@ class ReplayTracker:
         Returns a boolean.
             - If there were no more actions to play, and so nothing happened, return True.
             - Otherwise, return False.
+
+        Args:
+        - Grid object
+
+        Raises:
+        - None
+
+        Returns:
+        - Bolean
+
+        Complexity:
+        - Worst case and Best: O(N)
         """
         if self.replay_tracker.is_empty():
             return True
         redo_layer = self.replay_tracker.serve()
         redo_layer, is_undo = redo_layer
         if is_undo:
-            redo_layer.undo_apply(grid)
+            redo_layer.undo_apply(grid) #O(N)
         else:
-            redo_layer.redo_apply(grid)
+            redo_layer.redo_apply(grid) #O(N)
         return False
 
 

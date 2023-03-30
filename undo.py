@@ -14,6 +14,19 @@ class UndoTracker:
 
         If your collection is already full,
         feel free to exit early and not add the action.
+
+        Args:
+        - Paintaction
+
+        Raises:
+        - Exception if is full
+        - Type error 
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case and Best: O(1)
         """
         if self.undo_tracker.is_full():
             return
@@ -26,13 +39,23 @@ class UndoTracker:
         Undo an operation, and apply the relevant action to the grid.
         If there are no actions to undo, simply do nothing.
 
-        :return: The action that was undone, or None.
+        Args:
+        - Grid object
+
+        Raises:
+        - type error
+
+        Returns:
+        - The action that was undone, or None.
+
+        Complexity:
+        - Worst case and Best: O(N)
         """
         if self.undo_tracker.is_empty():
             return None
         undo_action = self.undo_tracker.pop()
         self.redo_tracker.push(undo_action)
-        undo_action.undo_apply(grid)
+        undo_action.undo_apply(grid) #O(N), input size is the steps
         return undo_action
 
     def redo(self, grid: Grid) -> PaintAction|None:
@@ -40,11 +63,21 @@ class UndoTracker:
         Redo an operation that was previously undone.
         If there are no actions to redo, simply do nothing.
 
-        :return: The action that was redone, or None.
+        Args:
+        - Grid object
+
+        Raises:
+        - type error
+
+        Returns:
+        - The action that was undone, or None.
+
+        Complexity:
+        - Worst case and Best: O(N)
         """
         if self.redo_tracker.is_empty():
             return
         redo_action = self.redo_tracker.pop()
         self.undo_tracker.push(redo_action)
-        redo_action.redo_apply(grid)
+        redo_action.redo_apply(grid) #O(N), input size is the steps
         return redo_action

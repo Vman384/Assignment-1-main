@@ -306,17 +306,43 @@ class MyWindow(arcade.Window):
 
     # STUDENT PART
 
-    def on_init(self):
-        """Initialisation that occurs after the system initialisation."""
+    def on_init(self) -> None:
+        """Initialisation that occurs after the system initialisation.
+        creates an instance of the undo and replay tracker
+        Args:
+        - None
+
+        Raises:
+        - None
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case and Best: O(1)
+        """
         self.undo_track = UndoTracker()
         self.replay_tracker = ReplayTracker()
 
-    def on_reset(self):
-        """Called when a window reset is requested."""
+    def on_reset(self) -> None:
+        """Called when a window reset is requested.
+        creates an instance of the undo and replay tracker (to clear/reset them)
+        Args:
+        - None
+
+        Raises:
+        - None
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case and Best: O(1)
+        """
         self.undo_track = UndoTracker()
         self.replay_tracker = ReplayTracker()
 
-    def on_paint(self, layer: Layer, px, py):
+    def on_paint(self, layer: Layer, px: int, py: int) -> None:
         """
         Called when a grid square is clicked on, which should trigger painting in the vicinity.
         Vicinity squares outside of the range [0, GRID_SIZE_X) or [0, GRID_SIZE_Y) can be safely ignored.
@@ -324,58 +350,167 @@ class MyWindow(arcade.Window):
         layer: The layer being applied.
         px: x position of the brush.
         py: y position of the brush.
+        adds the layer onto the corresponding layer store at that index
+        Args:
+        - Layer object
+
+
+        Raises:
+        - Index error if index is not in grid but catches this error and ignores
+        - Type error if any of the types are wrong
+        - Exception if undo or replay tracker is full
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case and Best: O(N^2) ignoring complexity of add as it is different depending on the layer
         """
         self.brush_size = self.grid.brush_size
         steps = PaintAction()
-        for i in range(-self.brush_size, self.brush_size + 1):
-            for j in range(-self.brush_size, self.brush_size + 1):
+        for i in range(-self.brush_size, self.brush_size + 1):  #O(N)
+            for j in range(-self.brush_size, self.brush_size + 1):  #O(N)
                 if abs(px - (px + i)) + abs(py - (py + j)) <= self.brush_size:
                     try:
                         x = abs(px + i)
                         y = abs(py + j)
-                        self.grid[x][y].add(layer)
+                        self.grid[x][y].add(layer)  #O(1) or O(M)
                         steps.add_step(PaintStep((x, y), layer))
                     except IndexError:
                         pass
         self.undo_track.add_action(steps)
         self.replay_tracker.add_action(steps)
 
-    def on_undo(self):
-        """Called when an undo is requested."""
-        self.undone_layer = self.undo_track.undo(self.grid)
+    def on_undo(self) -> None:
+        """Called when an undo is requested.
+        undoes the last action
+        Args:
+        - None
+
+        Raises:
+        - type error
+
+        Returns:
+        - None.
+
+        Complexity:
+        - Worst case and Best: O(N)
+        """
+        self.undone_layer = self.undo_track.undo(
+            self.grid
+        )  #O(N), size is dependent on the steps size which is related to brush size
         if self.undone_layer != None:
             self.replay_tracker.add_action(self.undone_layer, True)
 
+    def on_redo(self) -> None:
+        """Called when a redo is requested.
+        redoes the undone action
+        Args:
+        - None
 
-    def on_redo(self):
-        """Called when a redo is requested."""
-        self.redone_layer = self.undo_track.redo(self.grid)
+        Raises:
+        - type error
+
+        Returns:
+        - None.
+
+        Complexity:
+        - Worst case and Best: O(N)
+        """
+        self.redone_layer = self.undo_track.redo(
+            self.grid
+        )  #O(N), size is dependent on the steps size which is related to brush size
         if self.redone_layer != None:
             self.replay_tracker.add_action(self.redone_layer, False)
 
+    def on_special(self) -> None:
+        """Called when the special action is requested.
+        Args:
+        - None
 
-    def on_special(self):
-        """Called when the special action is requested."""
+        Raises:
+        - None but the special function in the layer store will raise something depending on which one, could be 
+            index error 
+
+        Returns:
+        - None.
+
+        Complexity:
+        - Worst case and Best: O(N^2) but dependent on which special is called, refer to main file
+        """
         self.grid.special()
 
-    def on_replay_start(self):
-        """Called when the replay starting is requested."""
-        print("replay is now starting")
+    def on_replay_start(self) -> None:
+        """Called when the replay starting is requested.
+        tells the user when the replay is strating 
+        Args:
+        - None
 
+        Raises:
+        - None
+
+        Returns:
+        - None.
+
+        Complexity:
+        - Worst case and Best: O(1)
+        
+        """
+        print("replay is now starting")
 
     def on_replay_next_step(self) -> bool:
         """
         Called when the next step of the replay is requested.
-        Returns whether the replay is finished.
+        replays a step
+        it is O(N) as it must iterate through the steps which can change in size depending on the brush size
+
+        Args:
+        - None
+
+        Raises:
+        - type error
+
+        Returns:
+        - Boleean
+
+        Complexity:
+        - Worst case and Best: O(N)
+
         """
         return self.replay_tracker.play_next_action(self.grid)
 
-    def on_increase_brush_size(self):
-        """Called when an increase to the brush size is requested."""
+    def on_increase_brush_size(self) -> None:
+        """Called when an increase to the brush size is requested.
+        increases the brush size by 1
+        Args:
+        - None
+
+        Raises:
+        - None, but will print if brush size is already max
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case and Best: O(1)
+        """
         self.grid.increase_brush_size()
 
-    def on_decrease_brush_size(self):
-        """Called when a decrease to the brush size is requested."""
+    def on_decrease_brush_size(self) -> None:
+        """Called when a decrease to the brush size is requested.
+        decreases the brush size by 1
+        Args:
+        - None
+
+        Raises:
+        - None, but will print if the brush size is already min
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case and Best: O(1)
+        """
         self.grid.decrease_brush_size()
 
 
