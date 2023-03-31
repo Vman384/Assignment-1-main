@@ -345,7 +345,6 @@ class SequenceLayerStore(LayerStore):
         for i in range(len(LAYERS)):
             try:
                 if type(LAYERS[i].index) == int:
-                    print(LAYERS[i].index)
                     if self.layers_store.__contains__(LAYERS[i].index+1):
                         current_layer = LAYERS[i]
                         current_color = current_layer.apply(current_color, timestamp, x, y)
