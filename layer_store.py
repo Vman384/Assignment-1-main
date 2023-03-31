@@ -4,8 +4,11 @@ from layer_util import Layer, LAYERS
 from data_structures.stack_adt import ArrayStack
 import layers
 from data_structures.queue_adt import CircularQueue
+from data_structures.bset import BSet
 from data_structures.array_sorted_list import ArraySortedList
 from data_structures.sorted_list_adt import ListItem
+
+
 
 
 class LayerStore(ABC):
@@ -86,9 +89,9 @@ class SetLayerStore(LayerStore):
             self.layers_store.push(layer)
             return True
         current_layer = self.layers_store.peek()
-        if layer == current_layer:
+        if layer == current_layer: #checking if the adding the layer will change the stack
             return False
-        self.layers_store.pop()
+        self.layers_store.pop() #if it will then remove the layer already there and push the new one
         self.layers_store.push(layer)
         return True
 
@@ -117,7 +120,7 @@ class SetLayerStore(LayerStore):
                 start, timestamp, x, y
             )  #apply is constant as it is max 3 iterations for any given layer
 
-        if self.special_state:
+        if self.special_state: #if the special state is true then we do the special method which is invert
             color = layers.invert.apply(color, timestamp, x, y)
 
         return color
@@ -141,7 +144,7 @@ class SetLayerStore(LayerStore):
         """
         if self.layers_store.is_empty():
             return False
-        self.layers_store.pop()
+        self.layers_store.pop() #removes the layer no matter what the arguement is
         return True
 
     def special(self) -> None:
@@ -160,7 +163,7 @@ class SetLayerStore(LayerStore):
             Complexity:
             - Worst case and Best: O(1)
         """
-        self.special_state = ~self.special_state
+        self.special_state = ~self.special_state #bitwise operation to flip the state
 
 
 class AdditiveLayerStore(LayerStore):
@@ -215,7 +218,7 @@ class AdditiveLayerStore(LayerStore):
         - result: a tuple with the rgb values of the color
 
         Complexity:
-        - Worst case and Best: O(N)
+        - Worst case and Best: O(N) N is the length of the self.layer_store
         """
         if self.layers_store.is_empty():
             return start
@@ -224,7 +227,7 @@ class AdditiveLayerStore(LayerStore):
 
         for _ in range(len(self.layers_store)):
             current_layer = self.layers_store.serve()
-            current_color = current_layer.apply(current_color, timestamp, x, y)
+            current_color = current_layer.apply(current_color, timestamp, x, y) #O(1) as its maxed at 3
             self.layers_store.append(current_layer)
 
         return current_color
@@ -265,13 +268,14 @@ class AdditiveLayerStore(LayerStore):
         - None
 
         Complexity:
-        - Worst case and Best: O(N)
+        - Worst case and Best: O(N) N is the length of the self.layer_store
         """
         self.reversed_queue = ArrayStack(len(self.layers_store))
         for _ in range(len(self.layers_store)):  #O(N)
             self.reversed_queue.push(self.layers_store.serve())
         for _ in range(len(self.reversed_queue)):  #(N)
             self.layers_store.append(self.reversed_queue.pop())
+
 
 
 class SequenceLayerStore(LayerStore):
@@ -282,43 +286,38 @@ class SequenceLayerStore(LayerStore):
     - special:
         Of all currently applied layers, remove the one with median `name`.
         In the event of two layers being the median names, pick the lexicographically smaller one.
+
+        create a bitset that checks if the layer at that index is applying or not, 1 if it is and 0 if its not
     """
     #can use a bitset to represent if the layers are applying or not todo if i have time
     def __init__(self) -> None:
         #O(1)
-        self.layers_store = ArraySortedList(10 * len(LAYERS))
+        self.layers_store = BSet(len(LAYERS))
 
     def add(self, layer: Layer) -> bool:
         """
         Add a layer to the store.
         Returns true if the LayerStore was actually changed.
-        contains didnt work with my implementation as it checks if the listitem object is the same, which it wont be if i create 
-        a new instance of it to add so instead i go through and check the value of the listitem object in the layer store and see 
-        if it is the same as the one i am trying to add in. This results in same time complexity so no loss, I would change
-        the implementation of contains but am not allowed so rip.
 
         Args:
             - layer object
 
         Raises:
-        - Exception, queue is full if it is
+        - Type error is item input into add is not integer
 
         Returns:
         - Boolean
 
         Complexity:
-        - Worst case: O(N) if item is not in list
-        - Best case: O(1) if item is the first item
+        - Worst case: O(1) 
+        - Best case: O(1) 
         """
-        for i in range(len(self.layers_store)):
-            if self.layers_store[i].value == layer: #its just adding .value as contains checks for the same list item object
-                #however contains takes the arguement of a list item object so we need to create one but then its not the same
-                #as the others in the layer as its a new object therefore contains never finds it so i had to do it this way
-                return False
+        self.temp_layer_store = self.layers_store
+        self.layers_store.add(layer.index+1)
+        if self.layers_store.intersection(self.temp_layer_store):
+            return False
         else:
-            layer_to_insert = ListItem(layer, layer.index)
-            self.layers_store.add(layer_to_insert)
-        return True
+            return True
                 
 
     def get_color(self, start :tuple , timestamp: float, x:int, y: int)  -> tuple[int, int, int]:
@@ -330,7 +329,7 @@ class SequenceLayerStore(LayerStore):
             - the timestamp as a float
 
         Raises:
-            - type Error: if any of the inputs are not correct type
+            - type Error: if any of the inputs are not correct type or if layer[i] is not int or input into contains is not int
 
         Returns:
             - result: a tuple with the rgb values of the color
@@ -343,9 +342,15 @@ class SequenceLayerStore(LayerStore):
 
         current_color = start
 
-        for i in range(len(self.layers_store)):
-            current_layer = self.layers_store[i].value
-            current_color = current_layer.apply(current_color, timestamp, x, y)
+        for i in range(len(LAYERS)):
+            try:
+                if type(LAYERS[i].index) == int:
+                    print(LAYERS[i].index)
+                    if self.layers_store.__contains__(LAYERS[i].index+1):
+                        current_layer = LAYERS[i]
+                        current_color = current_layer.apply(current_color, timestamp, x, y)
+            except:
+                break
 
         return current_color
 
@@ -353,8 +358,8 @@ class SequenceLayerStore(LayerStore):
         """
         Complete the erase action with this layer
         Returns true if the LayerStore was actually changed.
-        best case of one is worst case of other, an improvement could be to instead change the start value instead of shuffling 
-        everything left when we delete at the first index, this would get our best case down to O(1)
+        creates a temp layer store that is the origninal unchanged layer store then
+        removes layer from layer store and checks against temp layer store to see if it was changed
         Args:
             - 1 layer
 
@@ -364,20 +369,17 @@ class SequenceLayerStore(LayerStore):
         Returns:
             - result: a bolean if the layer was changed
         Complexity:
-            - Worst case and Best: O(N^2)
-            I could also have had a tuple for the layer to check if it was applying however, I would 
-            have had to make the sorted list initialised with all the layers and them applying false
-            that just seemed very hard cody to me therefore i took this approach. It would have not been
-            hard cody but LAYERS had a len of 20 when there is only 8 layers so is there more layers for later on????
+            - Worst case and Best: O(1)
         
         """
         if self.layers_store.is_empty():
             return False
-        for i in range(len(self.layers_store)): #O(N)
-            if self.layers_store[i].value == layer:
-                self.layers_store.delete_at_index(i) #O(N) as has to shuffle
-                return True
-        return False
+        self.temp_layer_store = self.layers_store
+        self.layers_store.remove(layer.index+1)
+        if self.layers_store.intersection(self.temp_layer_store):
+            return False
+        else:
+            return True
 
     def special(self):
         """
@@ -393,13 +395,17 @@ class SequenceLayerStore(LayerStore):
         - None
 
         Complexity:
-        - Worst case and Best: O(N^2)
+        - Worst case and Best: O(N log (N))
         """
-        self.alphabetical_layers_store = ArraySortedList(len(self.layers_store))
-        for i in range(len(self.layers_store)): #O(N)
-            current_layer = ListItem(self.layers_store[i], self.layers_store[i].value.name)
-            self.alphabetical_layers_store.add(current_layer) #O(N)
+        self.alphabetical_layers_store = ArraySortedList(len(LAYERS))
+        for i in range(len(LAYERS)): #O(N)
+            try:
+                if self.layers_store.__contains__(LAYERS[i].index+1):
+                    current_layer = ListItem(LAYERS[i], LAYERS[i].name)
+                    self.alphabetical_layers_store.add(current_layer) #O(log N)
+            except:
+                break
         if self.alphabetical_layers_store.is_empty():
             return
         middle_layer = self.alphabetical_layers_store[(len(self.alphabetical_layers_store)-1)//2].value
-        self.layers_store.delete_at_index(self.layers_store.index(middle_layer)) #O(N log(N))
+        self.layers_store.remove(middle_layer.index+1) #O(1)
